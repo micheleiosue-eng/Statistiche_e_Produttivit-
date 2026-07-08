@@ -52,6 +52,8 @@ interface AppContextValue extends AppState {
     overdue: number
     completedOnTime: number
     completedLate: number
+    inReview: number
+    todo: number
   }
 }
 
@@ -198,6 +200,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
           !!t.dueDate &&
           t.updatedAt.slice(0, 10) > t.dueDate,
       ).length,
+      inReview: state.tasks.filter((t) => t.status === 'review').length,
+      todo: state.tasks.filter((t) => t.status === 'todo').length,
     }),
     [state.tasks, overdueTasks],
   )

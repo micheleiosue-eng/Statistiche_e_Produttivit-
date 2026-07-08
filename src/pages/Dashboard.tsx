@@ -72,6 +72,18 @@ export function Dashboard() {
       icon: AlertTriangle,
       color: 'text-red-600 bg-red-50',
     },
+    {
+      label: 'In revisione',
+      value: stats.inReview,
+      icon: Clock,
+      color: 'text-blue-600 bg-blue-50',
+    },
+    {
+      label: 'Da fare',
+      value: stats.todo,
+      icon: Clock,
+      color: 'text-gray-600 bg-gray-50',
+    },
   ]
 
 
