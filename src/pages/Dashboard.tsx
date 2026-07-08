@@ -75,17 +75,15 @@ export function Dashboard() {
     {
       label: 'In revisione',
       value: stats.inReview,
-      icon: Clock, // or choose a more suitable icon if available
+      icon: Clock,
       color: 'text-blue-600 bg-blue-50',
     },
     {
       label: 'Da fare',
       value: stats.todo,
-      icon: Clock, // or choose a different icon if desired
+      icon: Clock,
       color: 'text-gray-600 bg-gray-50',
     },
-
-    
   ]
 
 

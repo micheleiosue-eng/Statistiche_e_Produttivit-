@@ -52,6 +52,8 @@ interface AppContextValue extends AppState {
     overdue: number
     completedOnTime: number
     completedLate: number
+    inReview: number
+    todo: number
   }
 }
 
@@ -198,6 +200,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
           !!t.dueDate &&
           t.updatedAt.slice(0, 10) > t.dueDate,
       ).length,
+      inReview: state.tasks.filter((t) => t.status === 'review').length,
+      todo: state.tasks.filter((t) => t.status === 'todo').length,
     }),
     [state.tasks, overdueTasks],
   )
@@ -238,29 +242,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }
 
-// Le costanti degli status probabilmente si trovano in ../types, importando STATUS_LABELS
-// Qui invece usiamo direttamente i valori di TaskStatus, per evitare errori di tipo.
-// Assumiamo che 'in_review' e 'todo' siano gli status corretti secondo l'enum TaskStatus.
-
 export function useApp() {
   const ctx = useContext(AppContext)
   if (!ctx) throw new Error('useApp must be used within AppProvider')
-
-  // aggiungiamo i conteggi dal context di stato
-  const inReviewCount = ctx.tasks.filter((t) => t.status === 'in_review').length
-  const todoCount = ctx.tasks.filter((t) => t.status === 'todo').length
-
-  return {
-    ...ctx,
-    inReviewCount,
-    todoCount,
-  }
+  return ctx
 }
-  return {
-    ...ctx,
-    inReviewCount: ctx.tasks.filter((t) => t.status === 'in_review').length,
-    todoCount: ctx.tasks.filter((t) => t.status === 'todo').length,
-  }
 
-
-export type { TaskPriority, TaskStatus };
+export type { TaskPriority, TaskStatus }
