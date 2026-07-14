@@ -7,12 +7,12 @@ import { Team } from './pages/Team'
 import { CalendarPage } from './pages/CalendarPage'
 import { GestioneStato } from './pages/GestioneStato'
 
-export default function App() {
+function App() {
   return (
-    <AppProvider>
-      <BrowserRouter>
+    <BrowserRouter>
+      <AppProvider>
         <Routes>
-          <Route element={<Layout />}>
+          <Route path="/" element={<Layout />}>
             <Route index element={<Dashboard />} />
             <Route path="board" element={<Board />} />
             <Route path="team" element={<Team />} />
@@ -20,7 +20,9 @@ export default function App() {
             <Route path="gestione_stato" element={<GestioneStato />} />
           </Route>
         </Routes>
-      </BrowserRouter>
-    </AppProvider>
-  )
+      </AppProvider>
+    </BrowserRouter>
+  );
 }
+
+export default App;

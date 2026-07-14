@@ -8,14 +8,38 @@ export interface TeamMember {
   role: string
   color: string
 }
+export interface Attachment {
+  id: string
+  taskid?: string
+  fileName: string
+  path: string
+  type: string
+  size: number
+}
+
+export interface Folder {
+  id: string
+  name: string
+  color: string
+}
+
+export interface Folder {
+  id: string
+  name: string
+  color: string
+}
 
 export interface Task {
   id: string
   title: string
   description: string
+  notes: string
+  links: string[]
+  attachments: Attachment[]
   status: TaskStatus
   priority: TaskPriority
   assigneeId: string | null
+  folderId?: string | null
   dueDate: string | null
   tags: string[]
   createdAt: string
@@ -24,6 +48,7 @@ export interface Task {
 
 export interface AppState {
   members: TeamMember[]
+  folders: Folder[]
   tasks: Task[]
 }
 
