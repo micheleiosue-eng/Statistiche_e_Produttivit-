@@ -5,6 +5,8 @@ import { Dashboard } from "./pages/Dashboard";
 import { Board } from "./pages/Board";
 import { Team } from "./pages/Team";
 import { GestioneStato } from "./pages/GestioneStato";
+import { GestioneCategorie } from "./pages/GestioneCategorie";
+import { GestioneProgetti } from "./pages/GestioneProgetti";
 
 function App() {
   return (
@@ -16,6 +18,8 @@ function App() {
             <Route path="/board" element={<Board />} />
             <Route path="/team" element={<Team />} />
             <Route path="/gestione_stato" element={<GestioneStato />} />
+            <Route path="/categorie" element={<GestioneCategorie />} />
+            <Route path="/progetti" element={<GestioneProgetti />} />
           </Route>
         </Routes>
       </AppProvider>

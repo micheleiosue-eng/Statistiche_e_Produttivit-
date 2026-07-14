@@ -105,4 +105,6 @@ export const seedData: AppState = {
       updatedAt: '2026-07-05T09:00:00Z',
     },
   ],
+  categories: [],
+  projects: []
 }

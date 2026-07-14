@@ -5,18 +5,26 @@ import {
   Users,
   Zap,
   Settings,
+  Tags,
+  FolderOpen
 } from 'lucide-react'
 import { useApp } from '../store/AppContext'
+import { useEffect } from 'react'
 
 const links = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/board', label: 'Board', icon: Kanban },
   { to: '/team', label: 'Team', icon: Users },
   { to: '/gestione_stato', label: 'Stati', icon: Settings },
+  { to: '/categorie', label: 'Categorie', icon: Tags },
 ]
 
 export function Sidebar() {
-  const { stats } = useApp()
+  const { stats, projects, fetchProjects } = useApp()
+
+  useEffect(() => {
+    fetchProjects()
+  }, [fetchProjects])
 
   return (
     <aside className="hidden lg:flex w-64 shrink-0 bg-white border-r border-slate-200 flex-col">
@@ -53,6 +61,30 @@ export function Sidebar() {
           </NavLink>
         ))}
       </nav>
+
+      {/* Sezione Progetti */}
+      <div className="p-3 border-t border-slate-200">
+        <div className="flex items-center justify-between px-3 mb-2">
+          <NavLink 
+            to="/progetti"
+            className="text-xs font-semibold text-slate-500 uppercase tracking-wide hover:text-indigo-600 transition-colors"
+          >
+            Progetti
+          </NavLink>
+        </div>
+        <div className="space-y-1">
+          {projects.length === 0 ? (
+            <p className="text-xs text-slate-400 px-3 italic">Nessun progetto</p>
+          ) : (
+            projects.map(p => (
+              <div key={p.id} className="flex items-center gap-3 px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg cursor-pointer transition-colors">
+                <FolderOpen className="w-4 h-4 shrink-0 text-indigo-400" />
+                <span className="truncate">{p.name}</span>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
 
       <div className="p-4 border-t border-slate-200">
         <div className="bg-slate-50 rounded-xl p-3 space-y-2">
