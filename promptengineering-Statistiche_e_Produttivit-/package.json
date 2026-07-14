@@ -5,20 +5,35 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "server": "node server/index.js",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fullcalendar/daygrid": "^6.1.21",
+    "@fullcalendar/react": "^6.1.21",
+    "@react-oauth/google": "^0.13.5",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "google-auth-library": "^10.9.0",
+    "jsonwebtoken": "^9.0.3",
     "lucide-react": "^1.23.0",
+    "multer": "^2.2.0",
+    "node-cron": "^4.6.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-router-dom": "^7.18.1",
     "recharts": "^3.9.2",
+    "slugify": "^1.6.9",
+    "sqlite3": "^6.0.1",
     "uuid": "^14.0.1"
   },
   "devDependencies": {
-    "recharts": "^3.9.2",
     "@tailwindcss/vite": "^4.3.2",
     "@types/node": "^24.13.2",
     "@types/react": "^19.2.17",
@@ -26,8 +41,12 @@
     "@types/uuid": "^10.0.0",
     "@vitejs/plugin-react": "^6.0.3",
     "oxlint": "^1.71.0",
+    "recharts": "^3.9.2",
     "tailwindcss": "^4.3.2",
     "typescript": "~6.0.2",
     "vite": "^8.1.1"
+  },
+  "allowScripts": {
+    "sqlite3@6.0.1": true
   }
 }

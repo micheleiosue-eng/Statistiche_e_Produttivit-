@@ -4,6 +4,8 @@ import { initDb, resetDb } from './config/db.js';
 import { getMembers, createMember, updateMember, deleteMember } from './controllers/membersController.js';
 import { getFolders, createFolder, updateFolder, deleteFolder } from './controllers/foldersController.js';
 import { getTasks, createTask, updateTask, deleteTask } from './controllers/tasksController.js';
+import { getCategories, createCategory, updateCategory, deleteCategory } from './controllers/categoriesController.js';
+import { getProjects, createProject, updateProject, deleteProject } from './controllers/projectsController.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -38,6 +40,18 @@ app.get('/api/tasks', getTasks);
 app.post('/api/tasks', createTask);
 app.put('/api/tasks/:id', updateTask);
 app.delete('/api/tasks/:id', deleteTask);
+
+// Categorie
+app.get('/api/categories', getCategories);
+app.post('/api/categories', createCategory);
+app.put('/api/categories/:id', updateCategory);
+app.delete('/api/categories/:id', deleteCategory);
+
+// Progetti
+app.get('/api/projects', getProjects);
+app.post('/api/projects', createProject);
+app.put('/api/projects/:id', updateProject);
+app.delete('/api/projects/:id', deleteProject);
 
 app.listen(PORT, () => {
   console.log(`Server Express (strutturato) in esecuzione sulla porta ${PORT}`);

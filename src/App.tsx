@@ -6,6 +6,8 @@ import { Board } from './pages/Board'
 import { Team } from './pages/Team'
 import { CalendarPage } from './pages/CalendarPage'
 import { GestioneStato } from './pages/GestioneStato'
+import { GestioneCategorie } from './pages/GestioneCategorie'
+import { GestioneProgetti } from './pages/GestioneProgetti'
 
 function App() {
   return (
@@ -18,6 +20,8 @@ function App() {
             <Route path="team" element={<Team />} />
             <Route path="calendar" element={<CalendarPage />} />
             <Route path="gestione_stato" element={<GestioneStato />} />
+            <Route path="categorie" element={<GestioneCategorie />} />
+            <Route path="progetti" element={<GestioneProgetti />} />
           </Route>
         </Routes>
       </AppProvider>

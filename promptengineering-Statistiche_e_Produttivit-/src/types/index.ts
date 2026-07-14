@@ -1,5 +1,15 @@
 export type TaskStatus = 'todo' | 'in_progress' | 'review' | 'done'
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent'
+export type RepeatType = 'daily' | 'weekly' | 'monthly' | 'yearly' | 'custom'
+
+export interface User {
+  id: string
+  firstName: string
+  lastName: string
+  email: string
+  provider?: string
+  createdAt?: string
+}
 
 export interface TeamMember {
   id: string
@@ -9,10 +19,22 @@ export interface TeamMember {
   color: string
 }
 
+export interface Attachment {
+  id: string
+  taskId?: string
+  fileName: string
+  path: string
+  type: string
+  size: number
+}
+
 export interface Task {
   id: string
   title: string
   description: string
+  notes: string
+  links: string[]
+  attachments: Attachment[]
   status: TaskStatus
   priority: TaskPriority
   assigneeId: string | null
@@ -20,6 +42,16 @@ export interface Task {
   tags: string[]
   createdAt: string
   updatedAt: string
+  categoryId?: string | null
+  projectId?: string | null
+  favorite?: boolean
+  archived?: boolean
+  estimatedTime?: number | null // in minutes
+  reminderDate?: string | null
+  repeatType?: RepeatType | null
+  repeatEvery?: number | null
+  repeatEnd?: string | null
+  repeatDays?: string[] | null
 }
 
 export interface Category {
@@ -39,11 +71,29 @@ export interface Project {
   createdAt: string
 }
 
+export interface Goal {
+  id: string
+  userId: string
+  type: 'daily' | 'weekly'
+  target: number
+  createdAt: string
+}
+
+export interface Notification {
+  id: string
+  message: string
+  read: boolean
+  createdAt: string
+}
+
 export interface AppState {
   members: TeamMember[]
   tasks: Task[]
   categories: Category[]
   projects: Project[]
+  goals: Goal[]
+  notifications: Notification[]
+  folders?: any[]
 }
 
 export const STATUS_LABELS: Record<TaskStatus, string> = {

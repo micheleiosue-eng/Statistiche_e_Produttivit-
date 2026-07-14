@@ -9,8 +9,9 @@ import {
 import { Link } from 'react-router-dom'
 import { useApp } from '../store/AppContext'
 import { STATUS_LABELS } from '../types'
-import { MemberAvatar } from '../components/MemberAvatar'
 import { PriorityBadge } from '../components/PriorityBadge'
+import { GoalWidget } from '../components/GoalWidget'
+import { MemberAvatar } from '../components/MemberAvatar'
 import { formatDate, statusStyles } from '../utils/helpers'
 
 // Importiamo i componenti grafici di Recharts
@@ -159,6 +160,11 @@ export function Dashboard() {
           Dashboard con statistiche relative all'attività dell'utente e del team.
         </p>
       </header>
+
+      {/* WIDGET OBIETTIVO GIORNALIERO */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <GoalWidget />
+      </div>
 
       {/* SEZIONE 1: I 6 CONTATORI RICHIESTI */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">

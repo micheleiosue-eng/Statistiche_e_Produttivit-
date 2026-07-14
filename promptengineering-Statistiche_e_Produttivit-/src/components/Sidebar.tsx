@@ -6,21 +6,29 @@ import {
   Zap,
   Settings,
   Tags,
-  FolderOpen
+  FolderOpen,
+  Calendar,
+  Archive,
+  LogOut
 } from 'lucide-react'
 import { useApp } from '../store/AppContext'
+import { useAuth } from '../store/AuthContext'
 import { useEffect } from 'react'
+import { NotificationCenter } from './NotificationCenter'
 
 const links = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/board', label: 'Board', icon: Kanban },
+  { to: '/calendar', label: 'Calendar', icon: Calendar },
   { to: '/team', label: 'Team', icon: Users },
   { to: '/gestione_stato', label: 'Stati', icon: Settings },
   { to: '/categorie', label: 'Categorie', icon: Tags },
+  { to: '/archivio', label: 'Archivio', icon: Archive },
 ]
 
 export function Sidebar() {
   const { stats, projects, fetchProjects } = useApp()
+  const { user, logout } = useAuth()
 
   useEffect(() => {
     fetchProjects()
@@ -33,12 +41,13 @@ export function Sidebar() {
           <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center">
             <Zap className="w-5 h-5 text-white" />
           </div>
-          <div>
+          <div className="flex-1">
             <h1 className="text-lg font-bold text-slate-900 leading-tight">
               TeamFlow
             </h1>
             <p className="text-xs text-slate-500">Task Management</p>
           </div>
+          <NotificationCenter />
         </div>
       </div>
 
@@ -86,8 +95,8 @@ export function Sidebar() {
         </div>
       </div>
 
-      <div className="p-4 border-t border-slate-200">
-        <div className="bg-slate-50 rounded-xl p-3 space-y-2">
+      <div className="p-4 border-t border-slate-200 flex-1 flex flex-col justify-end">
+        <div className="bg-slate-50 rounded-xl p-3 space-y-2 mb-4">
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
             Riepilogo
           </p>
@@ -102,6 +111,27 @@ export function Sidebar() {
             </div>
           </div>
         </div>
+
+        {user && (
+          <div className="flex items-center gap-3 bg-white p-3 rounded-xl border border-slate-200">
+            <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold shrink-0">
+              {user.firstName?.[0]}{user.lastName?.[0]}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-slate-900 truncate">
+                {user.firstName} {user.lastName}
+              </p>
+              <p className="text-xs text-slate-500 truncate">{user.email}</p>
+            </div>
+            <button
+              onClick={logout}
+              title="Esci"
+              className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+        )}
       </div>
     </aside>
   )

@@ -41,6 +41,16 @@ const initialTasks = [
     tags: JSON.stringify(['planning']),
     createdAt: '2026-07-01T09:00:00Z',
     updatedAt: '2026-07-05T14:30:00Z',
+    categoryId: null,
+    projectId: null,
+    favorite: 0,
+    archived: 0,
+    estimatedTime: 120,
+    reminderDate: null,
+    repeatType: null,
+    repeatEvery: null,
+    repeatEnd: null,
+    repeatDays: null
   },
   {
     id: 't2',
@@ -54,6 +64,16 @@ const initialTasks = [
     tags: JSON.stringify(['backend', 'security']),
     createdAt: '2026-07-02T10:00:00Z',
     updatedAt: '2026-07-02T10:00:00Z',
+    categoryId: null,
+    projectId: null,
+    favorite: 1,
+    archived: 0,
+    estimatedTime: 300,
+    reminderDate: null,
+    repeatType: null,
+    repeatEvery: null,
+    repeatEnd: null,
+    repeatDays: null
   },
   {
     id: 't3',
@@ -67,6 +87,16 @@ const initialTasks = [
     tags: JSON.stringify(['design', 'ui']),
     createdAt: '2026-06-28T11:00:00Z',
     updatedAt: '2026-07-04T16:00:00Z',
+    categoryId: null,
+    projectId: null,
+    favorite: 0,
+    archived: 0,
+    estimatedTime: 480,
+    reminderDate: null,
+    repeatType: null,
+    repeatEvery: null,
+    repeatEnd: null,
+    repeatDays: null
   },
   {
     id: 't4',
@@ -80,6 +110,16 @@ const initialTasks = [
     tags: JSON.stringify(['testing']),
     createdAt: '2026-07-03T08:00:00Z',
     updatedAt: '2026-07-03T08:00:00Z',
+    categoryId: null,
+    projectId: null,
+    favorite: 0,
+    archived: 0,
+    estimatedTime: null,
+    reminderDate: null,
+    repeatType: null,
+    repeatEvery: null,
+    repeatEnd: null,
+    repeatDays: null
   },
   {
     id: 't5',
@@ -93,6 +133,16 @@ const initialTasks = [
     tags: JSON.stringify(['docs']),
     createdAt: '2026-06-20T09:00:00Z',
     updatedAt: '2026-06-30T17:00:00Z',
+    categoryId: null,
+    projectId: null,
+    favorite: 0,
+    archived: 1,
+    estimatedTime: 60,
+    reminderDate: null,
+    repeatType: null,
+    repeatEvery: null,
+    repeatEnd: null,
+    repeatDays: null
   },
   {
     id: 't6',
@@ -106,11 +156,37 @@ const initialTasks = [
     tags: JSON.stringify(['devops']),
     createdAt: '2026-07-04T12:00:00Z',
     updatedAt: '2026-07-05T09:00:00Z',
+    categoryId: null,
+    projectId: null,
+    favorite: 1,
+    archived: 0,
+    estimatedTime: 240,
+    reminderDate: null,
+    repeatType: null,
+    repeatEvery: null,
+    repeatEnd: null,
+    repeatDays: null
   },
 ];
 
 export function initDb() {
   db.serialize(() => {
+    // 0. Tabella users
+    db.run(`
+      CREATE TABLE IF NOT EXISTS users (
+        id TEXT PRIMARY KEY,
+        firstName TEXT NOT NULL,
+        lastName TEXT NOT NULL,
+        email TEXT UNIQUE NOT NULL,
+        password TEXT,
+        provider TEXT DEFAULT 'local',
+        resetToken TEXT,
+        resetTokenExpiry TEXT,
+        createdAt TEXT NOT NULL,
+        updatedAt TEXT NOT NULL
+      )
+    `);
+
     // 1. Tabella members
     db.run(`
       CREATE TABLE IF NOT EXISTS members (
@@ -131,7 +207,7 @@ export function initDb() {
       )
     `);
 
-    // 3. Tabella tasks (aggiornata con folderId)
+    // 3. Tabella tasks (aggiornata con folderId e nuovi campi)
     db.run(`
       CREATE TABLE IF NOT EXISTS tasks (
         id TEXT PRIMARY KEY,
@@ -145,8 +221,20 @@ export function initDb() {
         tags TEXT NOT NULL DEFAULT '[]',
         createdAt TEXT NOT NULL,
         updatedAt TEXT NOT NULL,
+        categoryId TEXT,
+        projectId TEXT,
+        favorite INTEGER DEFAULT 0,
+        archived INTEGER DEFAULT 0,
+        estimatedTime INTEGER,
+        reminderDate TEXT,
+        repeatType TEXT,
+        repeatEvery INTEGER,
+        repeatEnd TEXT,
+        repeatDays TEXT,
         FOREIGN KEY (assigneeId) REFERENCES members(id) ON DELETE SET NULL,
-        FOREIGN KEY (folderId) REFERENCES folders(id) ON DELETE SET NULL
+        FOREIGN KEY (folderId) REFERENCES folders(id) ON DELETE SET NULL,
+        FOREIGN KEY (categoryId) REFERENCES categories(id) ON DELETE SET NULL,
+        FOREIGN KEY (projectId) REFERENCES projects(id) ON DELETE SET NULL
       )
     `);
 
@@ -173,6 +261,48 @@ export function initDb() {
       )
     `);
 
+    // 6. Tabella stato
+    db.run(`
+      CREATE TABLE IF NOT EXISTS stato (
+        slug TEXT PRIMARY KEY,
+        valore_stato TEXT NOT NULL
+      )
+    `);
+
+    // 7. Tabella goals
+    db.run(`
+      CREATE TABLE IF NOT EXISTS goals (
+        id TEXT PRIMARY KEY,
+        userId TEXT NOT NULL,
+        type TEXT NOT NULL,
+        target INTEGER NOT NULL,
+        createdAt TEXT NOT NULL
+      )
+    `);
+
+    // 8. Tabella attachments
+    db.run(`
+      CREATE TABLE IF NOT EXISTS attachments (
+        id TEXT PRIMARY KEY,
+        taskId TEXT NOT NULL,
+        fileName TEXT NOT NULL,
+        path TEXT NOT NULL,
+        type TEXT NOT NULL,
+        size INTEGER NOT NULL,
+        FOREIGN KEY (taskId) REFERENCES tasks(id) ON DELETE CASCADE
+      )
+    `);
+
+    // 9. Tabella notifications
+    db.run(`
+      CREATE TABLE IF NOT EXISTS notifications (
+        id TEXT PRIMARY KEY,
+        message TEXT NOT NULL,
+        read INTEGER DEFAULT 0,
+        createdAt TEXT NOT NULL
+      )
+    `);
+
     // Eseguiamo il seed se le tabelle sono vuote
     db.get('SELECT COUNT(*) as count FROM members', (err, row) => {
       if (!err && row.count === 0) {
@@ -194,9 +324,9 @@ export function initDb() {
 
     db.get('SELECT COUNT(*) as count FROM tasks', (err, row) => {
       if (!err && row.count === 0) {
-        const stmt = db.prepare('INSERT INTO tasks (id, title, description, status, priority, assigneeId, folderId, dueDate, tags, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        const stmt = db.prepare('INSERT INTO tasks (id, title, description, status, priority, assigneeId, folderId, dueDate, tags, createdAt, updatedAt, categoryId, projectId, favorite, archived, estimatedTime, reminderDate, repeatType, repeatEvery, repeatEnd, repeatDays) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
         initialTasks.forEach((t) => {
-          stmt.run(t.id, t.title, t.description, t.status, t.priority, t.assigneeId, t.folderId, t.dueDate, t.tags, t.createdAt, t.updatedAt);
+          stmt.run(t.id, t.title, t.description, t.status, t.priority, t.assigneeId, t.folderId, t.dueDate, t.tags, t.createdAt, t.updatedAt, t.categoryId, t.projectId, t.favorite, t.archived, t.estimatedTime, t.reminderDate, t.repeatType, t.repeatEvery, t.repeatEnd, t.repeatDays);
         });
         stmt.finalize();
         console.log('Seed tasks completato.');
@@ -212,6 +342,7 @@ export function resetDb(callback) {
     db.run('DELETE FROM members');
     db.run('DELETE FROM categories');
     db.run('DELETE FROM projects');
+    db.run('DELETE FROM stato');
 
     const stmtM = db.prepare('INSERT INTO members (id, name, email, role, color) VALUES (?, ?, ?, ?, ?)');
     initialMembers.forEach((m) => stmtM.run(m.id, m.name, m.email, m.role, m.color));
@@ -221,9 +352,9 @@ export function resetDb(callback) {
     initialFolders.forEach((f) => stmtF.run(f.id, f.name, f.color));
     stmtF.finalize();
 
-    const stmtT = db.prepare('INSERT INTO tasks (id, title, description, status, priority, assigneeId, folderId, dueDate, tags, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    const stmtT = db.prepare('INSERT INTO tasks (id, title, description, status, priority, assigneeId, folderId, dueDate, tags, createdAt, updatedAt, categoryId, projectId, favorite, archived, estimatedTime, reminderDate, repeatType, repeatEvery, repeatEnd, repeatDays) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     initialTasks.forEach((t) => {
-      stmtT.run(t.id, t.title, t.description, t.status, t.priority, t.assigneeId, t.folderId, t.dueDate, t.tags, t.createdAt, t.updatedAt);
+      stmtT.run(t.id, t.title, t.description, t.status, t.priority, t.assigneeId, t.folderId, t.dueDate, t.tags, t.createdAt, t.updatedAt, t.categoryId, t.projectId, t.favorite, t.archived, t.estimatedTime, t.reminderDate, t.repeatType, t.repeatEvery, t.repeatEnd, t.repeatDays);
     });
     stmtT.finalize();
 

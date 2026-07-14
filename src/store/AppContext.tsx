@@ -46,21 +46,29 @@ interface AppContextValue extends AppState {
     inReview: number
     todo: number
   }
+  addCategory: (category: Omit<Category, 'id' | 'createdAt' | 'updatedAt'>) => void
+  updateCategory: (id: string, updates: Partial<Category>) => void
+  deleteCategory: (id: string) => void
+  addProject: (project: Omit<Project, 'id' | 'createdAt'>) => void
+  updateProject: (id: string, updates: Partial<Project>) => void
+  deleteProject: (id: string) => void
 }
 
 const AppContext = createContext<AppContextValue | null>(null)
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<AppState>({ tasks: [], members: [], folders: [] })
+  const [state, setState] = useState<AppState>({ tasks: [], members: [], folders: [], categories: [], projects: [] })
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function load() {
       try {
-        const [resTasks, resMembers, resFolders] = await Promise.all([
+        const [resTasks, resMembers, resFolders, resCategories, resProjects] = await Promise.all([
           fetch(`${API_BASE}/tasks`).then((r) => r.json()),
           fetch(`${API_BASE}/members`).then((r) => r.json()),
           fetch(`${API_BASE}/folders`).then((r) => r.json()),
+          fetch(`${API_BASE}/categories`).then((r) => r.json()),
+          fetch(`${API_BASE}/projects`).then((r) => r.json()),
         ])
 
         const normalizedTasks = (resTasks as Task[]).map((task) => ({
@@ -70,7 +78,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           attachments: task.attachments ?? [],
         }))
 
-        setState({ tasks: normalizedTasks, members: resMembers, folders: resFolders })
+        setState({ tasks: normalizedTasks, members: resMembers, folders: resFolders, categories: resCategories || [], projects: resProjects || [] })
       } catch (err) {
         console.error('Errore nel caricamento dei dati dal server:', err)
       } finally {
@@ -223,15 +231,107 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }).catch((err) => console.error("Errore durante l'eliminazione della cartella:", err))
   }, [])
 
+  const addCategory = useCallback((category: Omit<Category, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const now = new Date().toISOString()
+    const newCategory: Category = {
+      ...category,
+      id: uuid(),
+      createdAt: now,
+      updatedAt: now,
+    }
+
+    setState((prev) => ({
+      ...prev,
+      categories: [...prev.categories, newCategory],
+    }))
+
+    fetch(`${API_BASE}/categories`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newCategory),
+    }).catch((err) => console.error('Errore durante la creazione della categoria:', err))
+  }, [])
+
+  const updateCategory = useCallback((id: string, updates: Partial<Category>) => {
+    const now = new Date().toISOString()
+    setState((prev) => ({
+      ...prev,
+      categories: prev.categories.map((c) => (c.id === id ? { ...c, ...updates, updatedAt: now } : c)),
+    }))
+
+    fetch(`${API_BASE}/categories/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...updates, updatedAt: now }),
+    }).catch((err) => console.error("Errore durante l'aggiornamento della categoria:", err))
+  }, [])
+
+  const deleteCategory = useCallback((id: string) => {
+    setState((prev) => ({
+      ...prev,
+      categories: prev.categories.filter((c) => c.id !== id),
+    }))
+
+    fetch(`${API_BASE}/categories/${id}`, {
+      method: 'DELETE',
+    }).catch((err) => console.error("Errore durante l'eliminazione della categoria:", err))
+  }, [])
+
+  const addProject = useCallback((project: Omit<Project, 'id' | 'createdAt'>) => {
+    const now = new Date().toISOString()
+    const newProject: Project = {
+      ...project,
+      id: uuid(),
+      createdAt: now,
+    }
+
+    setState((prev) => ({
+      ...prev,
+      projects: [...prev.projects, newProject],
+    }))
+
+    fetch(`${API_BASE}/projects`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newProject),
+    }).catch((err) => console.error('Errore durante la creazione del progetto:', err))
+  }, [])
+
+  const updateProject = useCallback((id: string, updates: Partial<Project>) => {
+    setState((prev) => ({
+      ...prev,
+      projects: prev.projects.map((p) => (p.id === id ? { ...p, ...updates } : p)),
+    }))
+
+    fetch(`${API_BASE}/projects/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates),
+    }).catch((err) => console.error("Errore durante l'aggiornamento del progetto:", err))
+  }, [])
+
+  const deleteProject = useCallback((id: string) => {
+    setState((prev) => ({
+      ...prev,
+      projects: prev.projects.filter((p) => p.id !== id),
+    }))
+
+    fetch(`${API_BASE}/projects/${id}`, {
+      method: 'DELETE',
+    }).catch((err) => console.error("Errore durante l'eliminazione del progetto:", err))
+  }, [])
+
   const resetData = useCallback(async () => {
     try {
       await fetch(`${API_BASE}/reset`, { method: 'POST' })
-      const [resTasks, resMembers, resFolders] = await Promise.all([
+      const [resTasks, resMembers, resFolders, resCategories, resProjects] = await Promise.all([
         fetch(`${API_BASE}/tasks`).then((r) => r.json()),
         fetch(`${API_BASE}/members`).then((r) => r.json()),
         fetch(`${API_BASE}/folders`).then((r) => r.json()),
+        fetch(`${API_BASE}/categories`).then((r) => r.json()),
+        fetch(`${API_BASE}/projects`).then((r) => r.json()),
       ])
-      setState({ tasks: resTasks, members: resMembers, folders: resFolders })
+      setState({ tasks: resTasks, members: resMembers, folders: resFolders, categories: resCategories || [], projects: resProjects || [] })
     } catch (err) {
       console.error('Errore durante il reset dei dati:', err)
     }
@@ -289,6 +389,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       overdueTasks,
       loading,
       stats,
+      addCategory,
+      updateCategory,
+      deleteCategory,
+      addProject,
+      updateProject,
+      deleteProject,
     }),
     [
       state,
@@ -308,12 +414,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
       overdueTasks,
       loading,
       stats,
+      addCategory,
+      updateCategory,
+      deleteCategory,
+      addProject,
+      updateProject,
+      deleteProject,
     ],
   )
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useApp() {
   const ctx = useContext(AppContext)
   if (!ctx) throw new Error('useApp must be used within AppProvider')

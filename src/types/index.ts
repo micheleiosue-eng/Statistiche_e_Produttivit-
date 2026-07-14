@@ -23,10 +23,21 @@ export interface Folder {
   color: string
 }
 
-export interface Folder {
+export interface Category {
   id: string
+  userId: string
   name: string
   color: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Project {
+  id: string
+  owner: string
+  name: string
+  description: string
+  createdAt: string
 }
 
 export interface Task {
@@ -50,6 +61,8 @@ export interface AppState {
   members: TeamMember[]
   folders: Folder[]
   tasks: Task[]
+  categories: Category[]
+  projects: Project[]
 }
 
 export const STATUS_LABELS: Record<TaskStatus, string> = {

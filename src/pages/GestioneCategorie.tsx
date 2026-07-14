@@ -25,7 +25,7 @@ export const GestioneCategorie: React.FC = () => {
       await addCategory({ name, color, userId: 'user_1' });
       setName('');
       setColor('#3b82f6');
-    } catch {
+    } catch (err) {
       setError('Errore durante il salvataggio.');
     }
   };

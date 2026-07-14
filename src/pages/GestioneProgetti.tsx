@@ -25,7 +25,7 @@ export const GestioneProgetti: React.FC = () => {
       await addProject({ name, description, owner: 'user_1' });
       setName('');
       setDescription('');
-    } catch {
+    } catch (err) {
       setError('Errore durante il salvataggio.');
     }
   };
